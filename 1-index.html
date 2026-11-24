@@ -48,8 +48,15 @@ const VEH={moto:'موتوسيكل',car:'عربية ملاكي',truck:'عربية
 const ERR={bad_login:'الرقم أو كلمة السر غلط',phone_taken:'الرقم ده مسجل قبل كده',bad_phone:'رقم الموبايل لازم يكون ١١ رقم ويبدأ بـ ٠١',weak_password:'كلمة السر لازم ٤ أحرف على الأقل',name_required:'اكتب الاسم',docs_required:'لازم ترفع الأوراق التلاتة',docs_too_big:'الصور كبيرة، جرّب صور أصغر',not_logged_in:'سجّل دخولك الأول',limit_reached:'وصلت للحد الأقصى من الأوردرات',order_unavailable:'الأوردر ده لم يعد متاح',wrong_code:'الكود غلط',not_approved:'حسابك لسه قيد المراجعة',wrong_vehicle:'الأوردر ده لمركبة تانية',missing_fields:'كمّل العنوان والتفاصيل والسعر',cannot_republish:'مينفعش ترفعه تاني'};
 let T=localStorage.getItem('voo.token')||null;
 let S={me:null,orders:[],off:0};
+let _jwt=null,_jwtExp=0;
+async function anonToken(){
+  if(!VOO.AUTH)return VOO.KEY||'';
+  if(_jwt&&Date.now()<_jwtExp-60000)return _jwt;
+  const r=await fetch(VOO.AUTH+'/token/anonymous');if(!r.ok)throw new Error('مفيش اتصال، جرّب تاني');
+  const j=await r.json();_jwt=j.token;_jwtExp=j.expires_at*1000;return _jwt}
 async function rpc(fn,args){
-  const r=await fetch(VOO.API+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:VOO.KEY,Authorization:'Bearer '+VOO.KEY},body:JSON.stringify(args||{})});
+  let r;try{const tk=await anonToken();
+  r=await fetch(VOO.API+fn,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},tk?{Authorization:'Bearer '+tk}:{},VOO.KEY?{apikey:VOO.KEY}:{}),body:JSON.stringify(args||{})})}catch(e){throw new Error('مفيش اتصال، جرّب تاني')}
   const j=await r.json().catch(()=>({}));
   if(!r.ok){const m=(j.message||'').trim();const e=new Error(ERR[m]||(m?'حصلت مشكلة: '+m:'مفيش اتصال، جرّب تاني'));e.code=m;throw e}
   return j}
