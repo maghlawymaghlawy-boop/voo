@@ -538,7 +538,7 @@ async function loadRevOne(id){try{REV.cur=await rpc('api_rev_get',{p_token:T,p_i
 async function loadTeam(){try{REV.team=await rpc('api_rev_team',{p_token:T})}catch(e){REV.team=[]}render()}
 const ROLE={shop:'محل',courier:'مندوب'};
 function revView(a,r){const u=me();
- const head=`<div class="top"><div><h2 style="margin:0">المراجعات</h2><p class="sm">${esc(u.name)}</p></div><span class="pill">${u.is_owner?'مالك':'مراجع'}</span></div>${u.role=='staff'||!a?`<div class="brow" style="margin:6px 0 0">${u.role=='staff'?'<button class="btn sm2" onclick="go(\'adm\')">الرئيسية</button>':''}${!a?'<button class="btn sm2" onclick="REV.list=null;render()">تحديث</button>':''}</div>`:''}`;
+ const head=`<div class="top"><div><h2 style="margin:0">المراجعات</h2><p class="sm">${esc(u.name)}</p></div><span class="pill">${u.is_owner?'مالك':'مراجع'}</span></div>${!a?`<div class="brow" style="margin:6px 0 0">${!a?'<button class="btn sm2" onclick="REV.list=null;render()">تحديث</button>':''}</div>`:''}`;
  if(!a){if(REV.list===null){loadRev();return head+'<p>بنحمّل...</p>'}
   const pend=REV.list.filter(x=>x.status=='pending'),done=REV.list.filter(x=>x.status!='pending');
   const card=x=>`<div class="card mini" onclick="REV.cur=null;go('rev/p/${x.id}')"><div class="row"><span class="pill ${x.status=='pending'?'w':x.status=='approved'?'g':'r'}">${x.status=='pending'?'قيد المراجعة':x.status=='approved'?'تمت المراجعة':'مرفوض'}</span><h3>${esc(x.name)} · ${ROLE[x.role]}</h3></div><p class="sm">${esc(x.phone)} · ${moneyD(x.status=='approved'?x.paid:x.claimed)} · ${new Date(x.at).toLocaleString('ar-EG')}</p></div>`;
@@ -567,7 +567,7 @@ const num=s=>parseFloat(String(s).replace(/[٠-٩]/g,d=>AR.indexOf(d)).replace('
 const SEC=[['orders','الأوردرات','adm/orders'],['couriers','المندوبين','adm/couriers'],['shops','المحلات','adm/shops'],['reviews','المراجعات (الدفع)','rev'],['settings','إعدادات الموقع','adm/set/courier'],['audit','سجل التغييرات','adm/audit'],['subs','الاشتراكات','adm/subs']];
 const SECN={orders:'الأوردرات',couriers:'المندوبين',shops:'المحلات',reviews:'المراجعات (الدفع)',settings:'إعدادات الموقع',audit:'سجل التغييرات',subs:'الاشتراكات'};
 function admNav(){const u=me();const it=[['adm','الرئيسية','⌂']];if(PM('reviews')>0)it.push(['rev','المراجعات','✔']);if(PM('subs')>0)it.push(['adm/subs','الاشتراكات','★']);if(PM('settings')>0||u.is_owner)it.push([u.is_owner||PM('settings')>0?'adm/set/courier':'adm','الإعدادات','⚙']);it.push(['adm/me','حسابي','◉']);return it}
-function admHead(t,sub,back){const u=me();return `<div class="top"><div><h2 style="margin:0">${t}</h2><p class="sm">${sub||esc(u.name)}</p></div><span class="pill">${u.is_owner?'مالك':'موظف'}</span></div>${back?`<button class="btn sm2" onclick="go('${back}')">رجوع</button>`:''}`}
+function admHead(t,sub,back){const u=me();return `<div class="top"><div><h2 style="margin:0">${t}</h2><p class="sm">${sub||esc(u.name)}</p></div><span class="pill">${u.is_owner?'مالك':'موظف'}</span></div>${back&&back!='adm'?`<button class="btn sm2" onclick="go('${back}')">رجوع</button>`:''}`}
 const ST={approved:['نشط','g'],pending:['قيد المراجعة','w'],suspended:['موقوف','r']};
 const OST={open:'بيستنى عروض',matched:'المندوب وصل',picked:'في الطريق',delivered:'اتسلّم',failed:'فشل التسليم',expired:'خلص الوقت'};
 const dt=ms=>ms?new Date(ms).toLocaleString('ar-EG',{timeZone:'Africa/Cairo',dateStyle:'short',timeStyle:'short'}):'';
